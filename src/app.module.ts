@@ -4,9 +4,10 @@ import { AppService } from './app.service.js';
 import { UserModule } from './user/user.module.js';
 import { APP_PIPE } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { PrismaModule } from './prisma/prisma.module.js';
 
 @Module({
-  imports: [UserModule],
+  imports: [UserModule, PrismaModule],
   controllers: [AppController],
   providers: [
     AppService,
