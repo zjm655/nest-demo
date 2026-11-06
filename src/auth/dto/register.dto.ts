@@ -1,5 +1,5 @@
 import { IsEmail, IsString, MinLength, MaxLength, IsOptional } from 'class-validator';
-
+import { MaxByteLength } from '../../common/validators/max-byte-length.js';
 export class RegisterDto {
     @IsString()
     @IsOptional()
@@ -11,6 +11,7 @@ export class RegisterDto {
 
     @IsString()
     @MinLength(6, { message: '密码长度不能少于6个字符' })
+    @MaxByteLength(72, { message: '密码长度不能超过72个字节' })
     @MaxLength(72, { message: '密码长度不能超过72个字符' })   
     password1: string;
 

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -15,7 +15,7 @@ export class UserService {
       }
     })
     if (existing) {
-      throw new UnauthorizedException('该邮箱已被注册！');
+      throw new ConflictException('该邮箱已被注册！');
     }
     
     const user = await this.prisma.user.create({

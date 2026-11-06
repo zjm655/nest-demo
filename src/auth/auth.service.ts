@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto.js';
 import { UserService } from '../user/user.service.js';
 import { LoginEmailDto } from './dto/login-email.dto.js';
@@ -14,7 +14,7 @@ export class AuthService {
 
     async register(data: RegisterDto) {
         if(data.password1 !== data.password2){
-            throw new Error('两次输入的密码不一致！');
+            throw new BadRequestException('两次输入的密码不一致！');
         }
         const hashedPassword = await bcrypt.hash(data.password1, 10);
 
