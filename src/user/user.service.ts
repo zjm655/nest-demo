@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -15,7 +15,13 @@ export class UserService {
       }
     })
     if (existing) {
-      throw new ConflictException('该邮箱已被注册！');
+      throw new HttpException(
+        {
+          code: 409,
+          message: '该邮箱已被注册！',
+        },
+        HttpStatus.CONFLICT,
+      );
     }
     
     const user = await this.prisma.user.create({
