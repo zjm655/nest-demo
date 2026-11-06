@@ -14,7 +14,11 @@ import { AuthModule } from './auth/auth.module.js';
     AppService,
     {
       provide: APP_PIPE,
-      useClass: ValidationPipe,
+      useFactory: () => new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
     }
   ],
 })

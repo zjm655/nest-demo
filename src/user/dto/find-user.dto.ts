@@ -1,3 +1,5 @@
+import { IsEmail } from 'class-validator';
 export class FindUserDto {
-  email: string;
+    @IsEmail()
+    email: string;
 }

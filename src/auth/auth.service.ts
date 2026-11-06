@@ -21,7 +21,7 @@ export class AuthService {
         const res = await this.userService.create({
             email: data.email,
             passwordHash: hashedPassword,
-            nickname: data.nickname,
+            nickname: data.nickname
         })
 
         return {
