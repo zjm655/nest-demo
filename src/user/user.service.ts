@@ -1,33 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import * as bcrypt from 'bcryptjs';
+import { FindUserDto } from './dto/find-user.dto.js';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
   
   async create(createUserDto: CreateUserDto) {
-    if(createUserDto.password1 !== createUserDto.password2){
-      throw new Error('两次输入的密码不一致！');
-
-    }
-    const existing = await this.prisma.user.findFirst({
+    const existing = await this.prisma.user.findUnique({
       where: {
         email: createUserDto.email
       }
     })
     if (existing) {
-      throw new Error('该邮箱已被注册！');
+      throw new UnauthorizedException('该邮箱已被注册！');
     }
-
-    const hashedPassword = await bcrypt.hash(createUserDto.password1, 10);
-
+    
     const user = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
-        password: hashedPassword,
+        password: createUserDto.passwordHash,
         nickname: createUserDto.nickname,
       },
       select: {
@@ -38,6 +32,15 @@ export class UserService {
       },
     });
 
+    return user;
+  }
+
+  async findUserByEmail(data:FindUserDto){
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: data.email,
+      }
+    })
     return user;
   }
 
