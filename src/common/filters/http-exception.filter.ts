@@ -3,10 +3,14 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
+  Logger,
 } from '@nestjs/common';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
+  private readonly logger = new Logger(HttpExceptionFilter.name, {
+    timestamp: true,
+  });
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
@@ -38,6 +42,14 @@ export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
     // 如果是500，需要把错误上报，信息要具体
     if (statusCode === 500) {
       // pass 上报逻辑，此处先空着，等后续接入日志系统补上
+      this.logger.error(
+        message,
+        exception instanceof Error ? exception.stack : undefined,
+      );
+    } else {
+      const url = ctx.getRequest().originalUrl;
+      if (url !== '/.well-known/appspecific/com.chrome.devtools.json')
+        this.logger.log(message);
     }
 
     if (code === -1) {
