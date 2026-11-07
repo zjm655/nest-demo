@@ -32,11 +32,7 @@ export class AuthService {
       role: 'user',
     });
 
-    return {
-      code: 200,
-      message: '注册成功！',
-      data: res,
-    };
+    return res;
   }
 
   async login(data: LoginEmailDto) {
@@ -68,6 +64,6 @@ export class AuthService {
       email: user.email,
       role: user.role,
     });
-    return { token };
+    return token;
   }
 }

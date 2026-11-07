@@ -21,7 +21,7 @@ export class AuthController {
     @Body() loginDto: LoginEmailDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { token } = await this.authService.login(loginDto);
+    const token = await this.authService.login(loginDto);
 
     res.cookie(ACCESS_TOKEN_COOKIE, token, {
       httpOnly: true,
@@ -31,9 +31,6 @@ export class AuthController {
       maxAge: Number(process.env.JWT_EXPIRES_IN) * 60 * 1000,
     });
 
-    return {
-      code: 200,
-      message: '登录成功！',
-    };
+    return;
   }
 }
