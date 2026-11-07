@@ -11,4 +11,7 @@ export class CreateUserDto {
 
     @IsString()
     passwordHash: string
+
+    @IsString()
+    role: string
 }
