@@ -37,6 +37,7 @@ export class UserService {
         nickname: true,
         createdAt: true,
         role: true,
+        password:false
       },
     });
 
