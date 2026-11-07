@@ -5,10 +5,14 @@ import { LoginEmailDto } from './dto/login-email.dto.js';
 import type { Response } from 'express';
 import { ACCESS_TOKEN_COOKIE } from './constants.js';
 import { Public } from './decorators/public.decorator.js';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
   @Public()
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
@@ -25,10 +29,11 @@ export class AuthController {
 
     res.cookie(ACCESS_TOKEN_COOKIE, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: this.configService.get('NODE_ENV') === 'production',
       sameSite: 'strict',
       path: '/',
-      maxAge: Number(process.env.JWT_EXPIRES_IN) * 60 * 1000,
+      maxAge:
+        Number(this.configService.getOrThrow('JWT_EXPIRES_IN')) * 60 * 1000,
     });
 
     return;

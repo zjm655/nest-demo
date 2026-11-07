@@ -9,9 +9,22 @@ import { AuthModule } from './auth/auth.module.js';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
+import { ConfigModule } from '@nestjs/config';
+import { validateEnv } from './config/env.validation.js';
 
 @Module({
-  imports: [UserModule, PrismaModule, AuthModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+      // 生产环境使用容器启动可能会使用env-file注入
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
+      validate: validateEnv,
+    }),
+    UserModule,
+    PrismaModule,
+    AuthModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
