@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor.js';
 
 @Module({
   imports: [UserModule, PrismaModule, AuthModule],
@@ -30,6 +31,10 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor.
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
     },
   ],
 })
