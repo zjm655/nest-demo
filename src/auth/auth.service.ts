@@ -25,6 +25,7 @@ export class AuthService {
             email: data.email,
             passwordHash: hashedPassword,
             nickname: data.nickname,
+            // role不该由前端指定，我们还未做响应拦截，所以这里默认是user
             role: "user"
         })
 
@@ -53,7 +54,7 @@ export class AuthService {
             }, HttpStatus.UNAUTHORIZED);
         }
 
-        const token = await this.jwtService.signAsync({ sub: user.id, email: user.email });
+        const token = await this.jwtService.signAsync({ sub: user.id, email: user.email, role: user.role });
         return { token }
     }
 }

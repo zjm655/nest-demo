@@ -29,12 +29,14 @@ export class UserService {
         email: createUserDto.email,
         password: createUserDto.passwordHash,
         nickname: createUserDto.nickname,
+        role: createUserDto.role || 'user',
       },
       select: {
         id: true,
         email: true,
         nickname: true,
         createdAt: true,
+        role: true,
       },
     });
 
