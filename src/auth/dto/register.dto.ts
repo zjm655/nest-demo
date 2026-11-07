@@ -12,7 +12,6 @@ export class RegisterDto {
     @IsString()
     @MinLength(6, { message: '密码长度不能少于6个字符' })
     @MaxByteLength(72, { message: '密码长度不能超过72个字节' })
-    @MaxLength(72, { message: '密码长度不能超过72个字符' })   
     password1: string;
 
     @IsString()
