@@ -10,6 +10,7 @@
     "build": "nest build",
     "deploy": "nest deploy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start --exec \"node --env-file=.env\"",
     "start:dev": "nest start --watch --exec \"node --env-file=.env\"",
     "start:debug": "nest start --debug --watch",
