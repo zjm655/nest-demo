@@ -15,16 +15,17 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
     AppService,
     {
       provide: APP_PIPE,
-      useFactory: () => new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-      }),
+      useFactory: () =>
+        new ValidationPipe({
+          whitelist: true,
+          forbidNonWhitelisted: true,
+          transform: true,
+        }),
     },
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
-    }
+    },
   ],
 })
 export class AppModule {}

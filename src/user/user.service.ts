@@ -7,13 +7,13 @@ import { FindUserDto } from './dto/find-user.dto.js';
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
-  
+
   async create(createUserDto: CreateUserDto) {
     const existing = await this.prisma.user.findUnique({
       where: {
-        email: createUserDto.email
-      }
-    })
+        email: createUserDto.email,
+      },
+    });
     if (existing) {
       throw new HttpException(
         {
@@ -23,7 +23,7 @@ export class UserService {
         HttpStatus.CONFLICT,
       );
     }
-    
+
     const user = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
@@ -37,19 +37,19 @@ export class UserService {
         nickname: true,
         createdAt: true,
         role: true,
-        password:false
+        password: false,
       },
     });
 
     return user;
   }
 
-  async findUserByEmail(data:FindUserDto){
+  async findUserByEmail(data: FindUserDto) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: data.email,
-      }
-    })
+      },
+    });
     return user;
   }
 
