@@ -16,7 +16,7 @@ class EnvironmentVariables {
 
   @IsInt()
   @Min(1)
-  JWT_EXPIRES_IN?: number;
+  JWT_EXPIRES_IN: number;
 
   @IsOptional()
   @IsInt()
