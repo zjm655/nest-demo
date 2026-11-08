@@ -5,6 +5,7 @@ import { RefreshSessionService } from './refresh-session.service.js';
 import { LoginEmailDto } from './dto/login-email.dto.js';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import type { User, IssuedTokens } from './types.js';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,17 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly refreshSessionService: RefreshSessionService,
   ) {}
+
+  private async signAccessToken(user: User) {
+    const accessToken = await this.jwtService.signAsync({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
+    const { exp } = this.jwtService.decode(accessToken) as { exp: number };
+    const accessTokenExpAt = new Date(exp * 1000);
+    return { accessToken, accessTokenExpAt };
+  }
 
   async register(data: RegisterDto) {
     if (data.password1 !== data.password2) {
@@ -61,13 +73,7 @@ export class AuthService {
       );
     }
 
-    const accessToken = await this.jwtService.signAsync({
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    });
-    const { exp } = this.jwtService.decode(accessToken) as { exp: number };
-    const accessTokenExpAt = new Date(exp * 1000);
+    const { accessToken, accessTokenExpAt } = await this.signAccessToken(user);
     const { refreshToken, expiresAt: refreshTokenExpAt } =
       await this.refreshSessionService.create(user.id);
     return { accessToken, accessTokenExpAt, refreshToken, refreshTokenExpAt };
@@ -77,5 +83,19 @@ export class AuthService {
     if (!refreshToken) return;
     await this.refreshSessionService.revoke(refreshToken);
     return;
+  }
+
+  async refreshTokens(rawRefreshToken: string): Promise<IssuedTokens> {
+    const session =
+      await this.refreshSessionService.verifyRefreshToken(rawRefreshToken);
+    const refreshRes = await this.refreshSessionService.rotate(session);
+    if (!refreshRes.reused) {
+      const { accessToken, accessTokenExpAt } = await this.signAccessToken(
+        session.user,
+      );
+      const { refreshToken, expiresAt: refreshTokenExpAt } = refreshRes;
+      return { accessToken, accessTokenExpAt, refreshToken, refreshTokenExpAt };
+    }
+    throw new HttpException('刷新令牌已被使用', HttpStatus.UNAUTHORIZED);
   }
 }

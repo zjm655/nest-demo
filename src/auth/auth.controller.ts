@@ -6,6 +6,7 @@ import {
   Res,
   HttpCode,
   HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { RegisterDto } from './dto/register.dto.js';
@@ -14,6 +15,7 @@ import type { Request, Response, CookieOptions } from 'express';
 import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from './constants.js';
 import { Public } from './decorators/public.decorator.js';
 import { ConfigService } from '@nestjs/config';
+import type { IssuedTokens } from './types.js';
 
 @Controller('auth')
 export class AuthController {
@@ -30,6 +32,18 @@ export class AuthController {
       path: '/',
     };
   }
+  private setAuthCookies(res: Response, tokens: IssuedTokens) {
+    res.cookie(ACCESS_TOKEN_COOKIE, tokens.accessToken, {
+      ...this.cookieOptions,
+      maxAge: tokens.accessTokenExpAt.getTime() - Date.now(),
+    });
+
+    res.cookie(REFRESH_TOKEN_COOKIE, tokens.refreshToken, {
+      ...this.cookieOptions,
+      path: '/auth',
+      maxAge: tokens.refreshTokenExpAt.getTime() - Date.now(),
+    });
+  }
 
   @Public()
   @Post('register')
@@ -44,20 +58,8 @@ export class AuthController {
     @Body() loginDto: LoginEmailDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, accessTokenExpAt, refreshToken, refreshTokenExpAt } =
-      await this.authService.login(loginDto);
-
-    res.cookie(ACCESS_TOKEN_COOKIE, accessToken, {
-      ...this.cookieOptions,
-      maxAge: accessTokenExpAt.getTime() - Date.now(),
-    });
-
-    res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
-      ...this.cookieOptions,
-      path: '/auth',
-      maxAge: refreshTokenExpAt.getTime() - Date.now(),
-    });
-
+    const tokens = await this.authService.login(loginDto);
+    this.setAuthCookies(res, tokens);
     return;
   }
 
@@ -72,6 +74,20 @@ export class AuthController {
       ...this.cookieOptions,
       path: '/auth',
     });
+    return;
+  }
+
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const raw = req.cookies?.[REFRESH_TOKEN_COOKIE] as string | undefined;
+    if (!raw) throw new HttpException('缺少刷新令牌', HttpStatus.UNAUTHORIZED);
+    const tokens = await this.authService.refreshTokens(raw);
+    this.setAuthCookies(res, tokens);
     return;
   }
 }
