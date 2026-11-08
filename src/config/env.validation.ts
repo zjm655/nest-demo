@@ -25,6 +25,10 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   NODE_ENV?: string;
+
+  @IsInt()
+  @Min(1)
+  REFRESH_TOKEN_TTL_DAYS: number;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

@@ -4,6 +4,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
+import { RefreshSessionService } from './refresh-session.service.js';
 import { UserModule } from '../user/user.module.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { RolesGuard } from './guards/roles.guard.js';
@@ -26,6 +27,7 @@ import { ConfigService } from '@nestjs/config';
   controllers: [AuthController],
   providers: [
     AuthService,
+    RefreshSessionService,
     JwtStrategy,
     {
       provide: APP_GUARD,
