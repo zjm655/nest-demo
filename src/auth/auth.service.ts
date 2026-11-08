@@ -72,4 +72,10 @@ export class AuthService {
       await this.refreshSessionService.create(user.id);
     return { accessToken, accessTokenExpAt, refreshToken, refreshTokenExpAt };
   }
+
+  async logout(refreshToken: string) {
+    if (!refreshToken) return;
+    await this.refreshSessionService.revoke(refreshToken);
+    return;
+  }
 }

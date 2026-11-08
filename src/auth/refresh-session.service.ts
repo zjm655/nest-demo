@@ -19,9 +19,13 @@ export class RefreshSessionService {
     );
   }
 
+  private hashToken(value: string) {
+    return createHash('sha256').update(value).digest('hex');
+  }
+
   async create(userId: number) {
     const refreshToken = randomBytes(48).toString('base64url');
-    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
+    const tokenHash = this.hashToken(refreshToken);
     const expiresAt = new Date(Date.now() + this.refreshTokenTtlMs);
 
     await this.prisma.refreshSession.create({
@@ -36,5 +40,19 @@ export class RefreshSessionService {
       refreshToken,
       expiresAt,
     };
+  }
+
+  async revoke(token: string) {
+    const tokenHash = this.hashToken(token);
+    await this.prisma.refreshSession.updateMany({
+      where: {
+        tokenHash,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
+    return;
   }
 }
