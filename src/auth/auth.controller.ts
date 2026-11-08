@@ -10,7 +10,7 @@ import { AuthService } from './auth.service.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginEmailDto } from './dto/login-email.dto.js';
 import type { Response, CookieOptions } from 'express';
-import { ACCESS_TOKEN_COOKIE } from './constants.js';
+import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from './constants.js';
 import { Public } from './decorators/public.decorator.js';
 import { ConfigService } from '@nestjs/config';
 
@@ -43,12 +43,18 @@ export class AuthController {
     @Body() loginDto: LoginEmailDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const token = await this.authService.login(loginDto);
+    const { accessToken, accessTokenExpAt, refreshToken, refreshTokenExpAt } =
+      await this.authService.login(loginDto);
 
-    res.cookie(ACCESS_TOKEN_COOKIE, token, {
+    res.cookie(ACCESS_TOKEN_COOKIE, accessToken, {
       ...this.cookieOptions,
-      maxAge:
-        Number(this.configService.getOrThrow('JWT_EXPIRES_IN')) * 60 * 1000,
+      maxAge: accessTokenExpAt.getTime() - Date.now(),
+    });
+
+    res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
+      ...this.cookieOptions,
+      path: '/auth',
+      maxAge: refreshTokenExpAt.getTime() - Date.now(),
     });
 
     return;

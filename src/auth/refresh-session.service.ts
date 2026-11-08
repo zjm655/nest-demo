@@ -22,15 +22,19 @@ export class RefreshSessionService {
   async create(userId: number) {
     const refreshToken = randomBytes(48).toString('base64url');
     const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
+    const expiresAt = new Date(Date.now() + this.refreshTokenTtlMs);
 
     await this.prisma.refreshSession.create({
       data: {
         userId,
         tokenHash,
-        expiresAt: new Date(Date.now() + this.refreshTokenTtlMs),
+        expiresAt,
       },
     });
 
-    return refreshToken;
+    return {
+      refreshToken,
+      expiresAt,
+    };
   }
 }

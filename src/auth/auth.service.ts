@@ -1,6 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto.js';
 import { UserService } from '../user/user.service.js';
+import { RefreshSessionService } from './refresh-session.service.js';
 import { LoginEmailDto } from './dto/login-email.dto.js';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -10,6 +11,7 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly refreshSessionService: RefreshSessionService,
   ) {}
 
   async register(data: RegisterDto) {
@@ -59,11 +61,15 @@ export class AuthService {
       );
     }
 
-    const token = await this.jwtService.signAsync({
+    const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       email: user.email,
       role: user.role,
     });
-    return token;
+    const { exp } = this.jwtService.decode(accessToken) as { exp: number };
+    const accessTokenExpAt = new Date(exp * 1000);
+    const { refreshToken, expiresAt: refreshTokenExpAt } =
+      await this.refreshSessionService.create(user.id);
+    return { accessToken, accessTokenExpAt, refreshToken, refreshTokenExpAt };
   }
 }
